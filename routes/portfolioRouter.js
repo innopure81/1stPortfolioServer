@@ -1,24 +1,40 @@
 const express = require('express');
+const Portfolio = require('../models/portfolio');
 const portfolioRouter = express.Router();
 
+
 portfolioRouter.route('/')
-.all((req, res, next) => {
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/plain');
-    next();
+.get((req, res, next) => {
+    Portfolio.find()
+    .then(portfolios => {
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.json(portfolios);
+    })
+    .catch(err => next(err));
 })
-.get((req, res) => {
-    res.end('Will send all the portfolios to you');
-})
-.post((req, res) => {
-    res.end(`Will add the portfolio: ${req.body.name} with description: ${req.body.description}`);
+.post((req, res, next) => {
+    Portfolio.create(req.body)
+    .then(portfolio => {
+        console.log('Portfolio Created ', portfolio);
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.json(portfolio);
+    })
+    .catch(err => next(err));
 })
 .put((req, res) => {
     res.statusCode = 403;
     res.end('PUT operation not supported on /portfolio');
 })
-.delete((req, res) => {
-    res.end('Deleting all portfolios');
+.delete((req, res, next) => {
+    Portfolio.deleteMany()
+    .then(response => {
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.json(response);
+    })
+    .catch(err => next(err));
 });
 
 module.exports = portfolioRouter;
